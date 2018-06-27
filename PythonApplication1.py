@@ -3,59 +3,46 @@
 # https://developer.ciscospark.com/#
 # 上記にログイン後右上のアイコンで自身のTOKENを確認
 
+import requests
 
-if content_type == 'application/json':
-      payload = request.body
-else:
-    payload = request.POST.get('payload')
+##自信のTOKENを変数として格納
+access_code = 'MWU4NjRmN2EtMjVjZi00MTk3LWIwOTgtNWRhYTYzNGUzYzU2NDhhMmFhN2EtOGZl'
+botDisplayName = 'Bot0@webex.bot'
 
-signature = request.META.get('HTTP_X_HUB_SIGNATURE')
+##WebexTeamsからPOSTされたデータの受け取り
+#投稿されたルームIDの取得
+for line in json()["items"]:
+    FromWebexTeams_RoomID = line["roomId"]
 
-print(payload)
-print(signature)
+##特定したルームIDのスペースで投稿された文字列を取得
+#requestsを投げるURLを格納
+url = 'https://api.ciscospark.com/v1/messages'
 
-if signature:
-    hasher = hmac.new(secret, payload, hashlib.sha1)
-    logger.debug('Signature : {}'.format(signature))
-    logger.debug('Calculated: sha1={}'.format(hasher.hexdigest()))
+#requestsで投げる情報
+headers = {
+    'Authorization' : 'Bearer ' + access_code,
+    'Content-Type' : 'application/json'
+}
 
+#requestsで投げる情報
+GetMessages_payload = {
+    "roomId" : FromWebexTeams_RoomID,
+    "max" : 1
+}
 
+#GetMessagesにrequestsで投げて帰ってきた結果を格納
+GetMessages = requests.get(url,params = GetMessages_payload ,headers = headers)
 
+#投稿されたメッセージの特定
+for line in GetMessages.json()["items"]:
+    PostMessages_text = line["text"]
 
+##特定したメッセージをそのままBotで投稿する
+#requestsで投げる情報
+PostMessages_payload = {
+    "roomId" : FromWebexTeams_RoomID,
+    "text" : PostMessages_text
+}
 
-
-
-
-
-
-
-
-
-#import requests
-
-# 自信のTOKENを変数として格納
-#access_code = 'MWU4NjRmN2EtMjVjZi00MTk3LWIwOTgtNWRhYTYzNGUzYzU2NDhhMmFhN2EtOGZl'
-#botDisplayName = 'Bot0@webex.bot'
-
-# requestsを投げるURLを格納
-#url = 'https://api.ciscospark.com/v1/messages'
-
-# requestsで投げる情報
-#headers = {
-#    'Authorization' : 'Bearer ' + access_code,
-#    'Content-Type' : 'application/json'
-#}
-
-# rにrequestsで投げて帰ってきた結果を格納
-#r = requests.get(url, headers = headers)
-
-#for line in r.json()["items"]:
-#    Message_text = line["text"]
-
-#Message_payload = {
-#    "roomId": Message_ID,
-    #Y2lzY29zcGFyazovL3VzL1JPT00vOGJkM2YwMjEtYjU2Yy0zOWI0LThjYzMtMTdlYmY3YmNlYzlh
-#    "text": Message_text,
-#}
-
-#Message_space = requests.post(url, json = Message_payload, headers = headers)
+#PostMessagesにrequestsで投げて帰ってきた結果を格納
+PostMessages = requests.get(url,json = PostMessages_payload ,headers = headers)
