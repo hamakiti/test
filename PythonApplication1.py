@@ -10,6 +10,10 @@ else:
     payload = request.POST.get('payload')
 
 signature = request.META.get('HTTP_X_HUB_SIGNATURE')
+
+print(payload)
+print(signature)
+
 if signature:
     hasher = hmac.new(secret, payload, hashlib.sha1)
     logger.debug('Signature : {}'.format(signature))
